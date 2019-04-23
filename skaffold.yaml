@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/krithiva/docker-atlassian-fisheye-crucible:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/krithiva/docker-atlassian-fisheye-crucible:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: docker-atlassian-fisheye-crucible
+        chartPath: charts/docker-atlassian-fisheye-crucible
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/krithiva/docker-atlassian-fisheye-crucible'
+          image.tag: '{{.DIGEST_HEX}}'
